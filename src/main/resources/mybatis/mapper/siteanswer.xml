@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.next.siteanswer.dao.ISiteanswerDao">
+ 	<select id="getSiteanswerCountByParent"
+ 			parameterType="com.next.siteanswer.vo.SiteanswerSearchVO"
+ 			resultType="int">
+ 		SELECT count(*)
+ 		  FROM siteanswer
+ 		 WHERE sa_sq_no = #{saSqNo} 	
+ 	</select>
+ 
+  	<select id="getSiteanswerVOListByParent"
+  			parameterType="com.next.siteanswer.vo.SiteanswerSearchVO"
+  			resultType="com.next.siteanswer.vo.SiteanswerVO">
+  		SELECT sa_no
+			 , sa_sq_no
+			 , sa_content
+			 , TO_CHAR(sa_reg_date, 'YYYY-MM-DD HH24:MI') AS sa_reg_date
+			 , TO_CHAR(sa_mod_date, 'YYYY-MM-DD HH24:MI') AS sa_mod_date
+			 , sa_attaches
+		  FROM siteanswer
+		 WHERE sa_sq_no = #{saSqNo} 	
+  	</select>
+  	
+  	  	<select id="getSiteanswerVOByParent"
+  			parameterType="com.next.siteanswer.vo.SiteanswerSearchVO"
+  			resultType="com.next.siteanswer.vo.SiteanswerVO">
+  		SELECT sa_no
+			 , sa_sq_no
+			 , sa_content
+			 , TO_CHAR(sa_reg_date, 'YYYY-MM-DD HH24:MI') AS sa_reg_date
+			 , TO_CHAR(sa_mod_date, 'YYYY-MM-DD HH24:MI') AS sa_mod_date
+			 , sa_attaches
+		  FROM siteanswer
+		 WHERE sa_sq_no = #{saSqNo} 	
+  	</select>
+ 
+  	<select id="getSiteanswerVO"
+  			parameterType="int"
+  			resultType="com.next.siteanswer.vo.SiteanswerVO">
+  		SELECT sa_no
+			 , sa_sq_no
+			 , sa_content
+			 , TO_CHAR(sa_reg_date, 'YYYY-MM-DD HH24:MI') AS sa_reg_date
+			 , TO_CHAR(sa_mod_date, 'YYYY-MM-DD HH24:MI') AS sa_mod_date
+			 , sa_attaches
+		  FROM siteanswer
+		 WHERE sa_no = #{saNo} 
+  	</select>
+  	
+  	<insert id="insertSiteanswer"
+  	        parameterType="com.next.siteanswer.vo.SiteanswerVO">
+  		INSERT INTO siteanswer ( sa_no
+							   , sa_sq_no
+							   , sa_content
+							   , sa_reg_date
+							) VALUES (
+							   SEQ_SITEANSWER.nextval
+							   , #{saSqNo}
+							   , #{saContent}
+							   , SYSDATE
+							)
+  	</insert>
+  
+  	<update id="updateSiteanswer"
+  			parameterType="com.next.siteanswer.vo.SiteanswerVO">
+  		UPDATE siteanswer
+		   SET sa_content  = #{saContent}
+		   	 , sa_mod_date = SYSDATE
+		 WHERE sa_no       = #{saNo}
+  	
+  	</update>
+  
+    <delete id="deleteSiteanswer"
+    		parameterType="com.next.siteanswer.vo.SiteanswerVO">
+    	DELETE FROM siteanswer
+    	      WHERE sa_no = #{saNo}
+    
+    </delete>
+</mapper>

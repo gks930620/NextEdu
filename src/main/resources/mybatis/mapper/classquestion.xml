@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.next.classquestion.dao.IClassquestionDao">
+
+	<select id="getClassquestionVOList"
+		resultType="com.next.classquestion.vo.ClassquestionVO"
+		parameterType="com.next.classquestion.vo.ClassquestionVO">		
+		SELECT cq_no
+		, cq_category
+		, cq_title
+		, TO_CHAR(NVL(cq_mod_date,cq_reg_date),'YYYY-MM-DD') AS cq_reg_date
+		, cq_mem_id
+		, (SELECT mem_name FROM member WHERE mem_id = cq_mem_id) AS cq_mem_name
+		, cq_answer_yn
+		FROM classquestion
+		where 1 = 1
+		<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(cqMemId)">
+			and cq_mem_id = #{cqMemId}
+		</if>
+		ORDER BY cq_no DESC
+	</select>
+
+	<select id="getClassquestion"
+		resultType="com.next.classquestion.vo.ClassquestionVO"
+		parameterType="int">
+		SELECT cq_no
+			, cq_category
+			, cq_title
+			, cq_content
+			, TO_CHAR(NVL(cq_mod_date,cq_reg_date),'YYYY-MM-DD HH24:MI') AS cq_reg_date
+			, cq_mem_id
+			, (SELECT mem_name FROM member WHERE mem_id = cq_mem_id) AS cq_mem_name
+			, cq_answer_yn
+			, ca_content
+			, ca_mem_id
+			, TO_CHAR(ca_reg_date,'YYYY-MM-DD HH24:MI') AS ca_reg_date
+		FROM classquestion
+	   WHERE 1 = 1
+		 AND cq_no = #{cqNo}
+	</select>
+
+	<insert id="insertQuestion"
+		parameterType="com.next.classquestion.vo.ClassquestionVO">
+		<selectKey resultType="int" keyProperty="cqNo" order="BEFORE">
+			SELECT seq_classquestion.nextval FROM dual
+		</selectKey>
+		INSERT INTO classquestion (
+		cq_no
+		, cq_category
+		, cq_title
+		, cq_content
+		, cq_reg_date
+		, cq_mem_id
+		, cq_answer_yn )
+		VALUES (
+		  #{cqNo}
+		, #{cqCategory}
+		, #{cqTitle}
+		, #{cqContent}
+		, SYSDATE
+		, #{cqMemId}
+		, 'N' )
+	</insert>
+
+	<update id="updateQuestion"
+		parameterType="com.next.classquestion.vo.ClassquestionVO">
+		UPDATE classquestion
+		   SET cq_title    = #{cqTitle}
+		     , cq_category = #{cqCategory}
+		     , cq_content  = #{cqContent}
+		     , cq_mod_date = SYSDATE
+	     WHERE cq_no = #{cqNo}
+	       AND cq_answer_yn = 'N'
+	</update>
+
+	<delete id="deleteQuestion"
+		parameterType="com.next.classquestion.vo.ClassquestionVO">
+		DELETE FROM classquestion 
+		 WHERE cq_no = #{cqNo}
+		   AND cq_answer_yn = 'N'
+	</delete>
+	
+	<update id="insertAnswer"
+		parameterType="com.next.classquestion.vo.ClassquestionVO">
+		UPDATE classquestion
+		   SET ca_content  = #{caContent}
+		     , ca_reg_date = SYSDATE
+		     , ca_mem_id   = #{caMemId}
+		     , cq_answer_yn = 'Y'
+	     WHERE cq_no = #{cqNo}
+	</update>
+	
+</mapper>

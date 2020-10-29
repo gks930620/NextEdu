@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+
+<mapper namespace="hh">
+	<select id="getReplyCountByParent"
+		parameterType="com.study.reply.vo.ReplySearchVO" resultType="int">
+		SELECT COUNT(*)
+		FROM reply
+		WHERE re_category = #{reCategory}
+		AND re_parent_no = #{reParentNo}
+	</select>
+
+	<select id="getReplyListByParent"
+		parameterType="com.study.reply.vo.ReplySearchVO"
+		resultType="com.study.reply.vo.ReplyVO">
+
+		<include refid="common.PRE_PAGING_SQL"></include>
+		SELECT re_no
+		, re_category
+		, re_parent_no
+		, re_mem_id
+		, (SELECT mem_name FROM member WHERE re_mem_id = mem_id) AS re_mem_name
+		, re_content
+		, re_ip
+		, TO_CHAR(re_reg_date,'YYYY.MM.DD HH24:MI') AS re_reg_date
+		, TO_CHAR(re_mod_date,'YYYY.MM.DD HH24:MI') AS re_mod_date
+		FROM reply
+		WHERE re_category = #{reCategory}
+		AND re_parent_no = #{reParentNo}
+		ORDER BY re_no DESC
+		<include refid="common.SUF_PAGING_SQL"></include>
+
+
+	</select>
+
+	<select id="getReply" parameterType="int"
+		resultType="com.study.reply.vo.ReplyVO">
+		SELECT re_no
+		, re_category
+		, re_parent_no
+		, re_mem_id
+		, (SELECT mem_name FROM member WHERE re_mem_id = mem_id) AS re_mem_name
+		, re_content
+		, re_ip
+		, TO_CHAR(re_reg_date,'YYYY.MM.DD HH24:MI') AS re_reg_date
+		, TO_CHAR(re_mod_date,'YYYY.MM.DD HH24:MI') AS re_mod_date
+		FROM reply
+		WHERE re_no = #{reNo}
+	</select>
+
+
+
+	<insert id="insertReply"
+		parameterType="com.study.reply.vo.ReplyVO">
+		INSERT INTO reply (
+		re_no , re_category , re_parent_no
+		, re_mem_id , re_content , re_ip
+		) VALUES (
+		seq_reply.nextval , #{reCategory} , #{reParentNo}
+		, #{reMemId} , #{reContent} , #{reIp}
+		)
+	</insert>
+
+	<update id="updateReply" parameterType="com.study.reply.vo.ReplyVO">
+		update reply SET re_content=#{reContent}, re_mod_date=SYSDATE
+		WHERE re_no=#{reNo}	
+	</update>
+
+
+	<delete id="deleteReply" parameterType="com.study.reply.vo.ReplyVO">
+		DELETE FROM reply
+		WHERE re_no=#{reNo}	
+	</delete>
+
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

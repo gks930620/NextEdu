@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="com.next.classhomeworksanswer.dao.IClasshomeworksanswerDao">
+
+	<resultMap type="com.next.classhomeworksanswer.vo.ClasshomeworksanswerVO" id="classhomeworksanswerMap">
+	  	<id column="cha_no"				property="chaNo" />
+	  	<result column="cha_title" 		property="chaTitle" />
+	  	<result column="cha_category" 	property="chaCategory" />
+	  	<result column="cha_mem_id" 	property="chaMemId" />
+	  	<result column="cha_mem_name" 	property="chaMemName" />
+	  	<result column="cha_content" 	property="chaContent" />
+	  	<result column="cha_reg_date" 	property="chaRegDate" />
+	  	<result column="cha_mod_date" 	property="chaModDate" />
+	  	<result column="cha_deadline" 	property="chaDeadline" />
+	  	<collection property="attaches" 
+	  				ofType="com.next.attach.vo.AttachVO"
+	  				column="{atchParentNo=cha_no, atchCategory=cha_type}" 
+	  				select="com.next.attach.dao.IAttachDao.getAttachByParentNoList" />
+	 </resultMap>
+	 
+	<select id="getClasshomeworksanswerVOCount" resultType="int" parameterType="com.next.common.vo.PagingVO">
+		SELECT count(*)
+		  FROM classhomeworksanswer 	
+ 	     WHERE 1 = 1
+ 	</select>
+ 	
+	<select id="getClasshomeworksanswerVOList" parameterType="com.next.classhomeworksanswer.vo.ClasshomeworksanswerVO" resultType="com.next.classhomeworksanswer.vo.ClasshomeworksanswerVO">
+		<include refid="common.PRE_PAGING_SQL" />
+		SELECT cha_no
+		     , cha_title
+		     , cha_content
+		     , TO_CHAR(cha_reg_date,'YYYY-MM-DD') AS cha_reg_date
+		     , TO_CHAR(cha_mod_date,'YYYY-MM-DD') AS cha_mod_date
+		     , TO_CHAR(cha_deadline,'YYYY-MM-DD') AS cha_deadline
+		     , cha_attaches
+		     , cha_submit_yn
+		     , cha_score
+		     , cha_mem_id
+		     , cha_mem_name
+		     , cha_category
+		FROM classhomeworksanswer
+	   WHERE cha_ch_no = #{chaChNo}
+		<include refid="common.SUF_PAGING_SQL" />
+	</select>
+	 
+	<select id="getClasshomeworkanswerVOS" resultMap="classhomeworksanswerMap">
+		SELECT cha_no
+		     , cha_title
+		     , cha_content
+		     , TO_CHAR(cha_reg_date,'YYYY-MM-DD') AS cha_reg_date
+		     , TO_CHAR(cha_mod_date,'YYYY-MM-DD') AS cha_mod_date
+		     , TO_CHAR(cha_deadline,'YYYY-MM-DD') AS cha_deadline
+		     , cha_attaches
+		     , cha_submit_yn
+		     , cha_score
+		     , cha_mem_id
+		     , cha_mem_name
+		     , cha_category
+		     , 'CLASSHOMEWORKSANSWER' AS cha_type
+		FROM classhomeworksanswer
+	   WHERE cha_ch_no = #{chaChNo}
+	     AND cha_mem_id = #{userId}
+	</select>
+	
+	<select id="getClasshomeworkanswerVOT" parameterType="int" resultMap="classhomeworksanswerMap">
+		SELECT cha_no
+		     , cha_title
+		     , cha_content
+		     , TO_CHAR(cha_reg_date,'YYYY-MM-DD') AS cha_reg_date
+		     , TO_CHAR(cha_mod_date,'YYYY-MM-DD') AS cha_mod_date
+		     , TO_CHAR(cha_deadline,'YYYY-MM-DD') AS cha_deadline
+		     , cha_attaches
+		     , cha_submit_yn
+		     , cha_score
+		     , cha_mem_id
+		     , cha_mem_name
+		     , cha_category
+		     , 'CLASSHOMEWORKSANSWER' AS cha_type
+		FROM classhomeworksanswer
+	   WHERE cha_no = #{chaNo}
+	</select>
+	
+	<insert id="insertClasshomeworksanswerVO" parameterType="com.next.classhomeworksanswer.vo.ClasshomeworksanswerVO">
+		<selectKey keyProperty="chaNo" order="BEFORE" resultType="int">
+ 			SELECT SEQ_HOMEWORKSANSWER.NEXTVAL FROM DUAL
+ 		</selectKey>
+		INSERT INTO classhomeworksanswer (
+			    cha_no
+			  ,	cha_title
+			  , cha_content
+			  , cha_reg_date
+			  , cha_deadline
+			  , cha_mem_id
+			  , cha_mem_name
+			  , cha_category
+			  , cha_ch_no
+			  , cha_submit_yn
+			) VALUES (
+			    #{chaNo}
+			  , #{chaTitle}
+			  , #{chaContent}
+			  , SYSDATE
+			  , #{chaDeadline}
+			  , #{chaMemId}
+			  , #{chaMemName}
+			  , #{chaCategory}
+			  , #{chaChNo}
+			  , 'Y'
+			)
+	</insert>
+	
+	<update id="updateClasshomeworksanswerVO" parameterType="com.next.classhomeworksanswer.vo.ClasshomeworksanswerVO">
+		UPDATE classhomeworksanswer
+		   SET cha_title 	= #{chaTitle}
+		   	 , cha_content 	= #{chaContent}
+		   	 , cha_mod_date = SYSDATE
+		 WHERE cha_no = #{chaNo}
+	</update>
+	 
+	<delete id="deleteClasshomeworksanswerVO" parameterType="com.next.classhomeworksanswer.vo.ClasshomeworksanswerVO">
+		DELETE FROM classhomeworksanswer
+			  WHERE cha_no = #{chaNo}
+	</delete>
+	
+	<update id="updateScoreClasshomeworksanswerVO" parameterType="com.next.classhomeworksanswer.vo.ClasshomeworksanswerVO">
+		UPDATE classhomeworksanswer
+		   SET cha_score = #{chaScore}
+		 WHERE cha_no = #{chaNo}
+	</update>
+</mapper>

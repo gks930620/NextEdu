@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="com.next.classhomeworks.dao.IClasshomeworksDao">
+ 	
+	<resultMap type="com.next.classhomeworks.vo.ClasshomeworksVO" id="classhomeworksMap">
+	  	<id column="ch_no"				property="chNo" />
+	  	<result column="ch_title" 		property="chTitle" />
+	  	<result column="ch_category" 	property="chCategory" />
+	  	<result column="ch_mem_id" 		property="chMemId" />
+	  	<result column="ch_mem_name" 	property="chMemName" />
+	  	<result column="ch_content" 	property="chContent" />
+	  	<result column="ch_reg_date" 	property="chRegDate" />
+	  	<result column="ch_mod_date" 	property="chModDate" />
+	  	<result column="ch_deadline" 	property="chDeadline" />
+	  	<collection property="attaches" 
+	  				ofType="com.next.attach.vo.AttachVO"
+	  				column="{atchParentNo=ch_no, atchCategory=ch_type}" 
+	  				select="com.next.attach.dao.IAttachDao.getAttachByParentNoList" />
+	 </resultMap>
+  
+	<select id="getClasshomeworksVOCount" resultType="int" parameterType="com.next.common.vo.PagingVO">
+		SELECT count(*)
+		  FROM classhomeworks 	
+ 	     WHERE 1 = 1
+ 	</select>
+ 	
+	<select id="getClasshomeworksVOList" resultType="com.next.classhomeworks.vo.ClasshomeworksVO" parameterType="com.next.common.vo.PagingVO">
+		<include refid="common.PRE_PAGING_SQL" />
+		SELECT ch_no
+		     , ch_title
+		     , ch_content
+		     , TO_CHAR(ch_reg_date,'YYYY-MM-DD') AS ch_reg_date
+		     , TO_CHAR(ch_mod_date,'YYYY-MM-DD') AS ch_mod_date
+		     , TO_CHAR(ch_deadline,'YYYY-MM-DD') AS ch_deadline
+		     , ch_category
+		     , ch_mem_id
+		     , ch_mem_name
+		  FROM classhomeworks
+	  ORDER BY ch_no DESC
+		<include refid="common.SUF_PAGING_SQL" />
+	</select>
+	
+	<!-- 학생 기준 화면. homeworks테이블 + homeworksanswer테이블에서 제출여부까지 조회 -->
+	<select id="getClasshomeworksVOStudentList" resultType="com.next.classhomeworks.vo.ClasshomeworksVO" parameterType="com.next.login.vo.UserVO">
+		<include refid="common.PRE_PAGING_SQL" />
+		SELECT ch_no
+		     , ch_title
+		     , ch_content
+		     , TO_CHAR(ch_reg_date,'YYYY-MM-DD') AS ch_reg_date
+		     , TO_CHAR(ch_mod_date,'YYYY-MM-DD') AS ch_mod_date
+		     , TO_CHAR(ch_deadline,'YYYY-MM-DD') AS ch_deadline
+		     , ch_category
+		     , ch_mem_id
+		     , ch_mem_name
+		     , cha_submit_yn
+		     , cha_score
+		   FROM classhomeworks H 
+LEFT OUTER JOIN classhomeworksanswer A
+			 ON h.ch_no = a.cha_ch_no
+		    AND a.cha_mem_id = #{userId}
+	   ORDER BY ch_no DESC
+	   <include refid="common.SUF_PAGING_SQL" />
+	</select>
+	
+	<select id="getClasshomeworksVO" resultMap="classhomeworksMap" parameterType="int">
+		SELECT ch_no
+		     , ch_title
+		     , ch_content
+		     , TO_CHAR(ch_reg_date,'YYYY-MM-DD') AS ch_reg_date
+		     , TO_CHAR(ch_mod_date,'YYYY-MM-DD') AS ch_mod_date
+		     , TO_CHAR(ch_deadline,'YYYY-MM-DD') AS ch_deadline
+		     , ch_category
+		     , ch_mem_id
+		     , ch_mem_name
+		     , 'CLASSHOMEWORKS' AS ch_type
+		  FROM classhomeworks
+		 WHERE ch_no = #{chNo}
+	</select>
+	
+	<insert id="insertClasshomeworksVO" parameterType="com.next.classhomeworks.vo.ClasshomeworksVO">
+		<selectKey keyProperty="chNo" order="BEFORE" resultType="int">
+ 			SELECT SEQ_HOMEWORKS.NEXTVAL FROM DUAL
+ 		</selectKey>
+		INSERT INTO classhomeworks (
+					 ch_no
+			       , ch_title
+			       , ch_content
+			       , ch_reg_date
+			       , ch_deadline
+			       , ch_category
+			       , ch_mem_id
+			       , ch_mem_name
+		 	) VALUES (
+		 			 #{chNo}
+		 		   , #{chTitle}
+		 		   , #{chContent}
+		 		   , SYSDATE
+		 		   , #{chDeadline}
+		 		   , #{chCategory}
+		 		   , #{chMemId}
+		 		   , #{chMemName}
+		 	)
+	</insert>
+	
+	<update id="updateClasshomeworksVO" parameterType="com.next.classhomeworks.vo.ClasshomeworksVO">
+		UPDATE CLASSHOMEWORKS
+		   SET ch_title 	= #{chTitle}
+		   	 , ch_content 	= #{chContent}
+		   	 , ch_mod_date  = SYSDATE
+		   	 , ch_category 	= #{chCategory}
+		 WHERE ch_no = #{chNo}
+	</update>
+	
+	<delete id="deleteClasshomeworksVO" parameterType="com.next.classhomeworks.vo.ClasshomeworksVO">
+		DELETE FROM classhomeworks
+			  WHERE ch_no = #{chNo}
+	</delete>
+	
+</mapper>

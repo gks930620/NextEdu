@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="com.next.classhomeworks.dao.IClasshomeworksDao">
+	<select id="getClasshomeworksVOList" resultType="com.next.classhomeworks.vo.ClasshomeworksVO">
+		
+		SELECT ch_no
+		     , ch_title
+		     , ch_content
+		     , TO_CHAR(ch_reg_date,'YYYY-MM-DD') AS ch_reg_date
+		     , TO_CHAR(ch_mod_date,'YYYY-MM-DD') AS ch_mod_date
+		     , TO_CHAR(ch_deadline,'YYYY-MM-DD') AS ch_deadline
+		     , ch_attaches
+		     , ch_category
+		     , ch_mem_id
+		  FROM classhomeworks
+		  
+	</select>
+	
+	<select id="getClasshomeworksVO" resultType="com.next.classhomeworks.vo.ClasshomeworksVO" parameterType="int">
+		SELECT ch_no
+		     , ch_title
+		     , ch_content
+		     , TO_CHAR(ch_reg_date,'YYYY-MM-DD') AS ch_reg_date
+		     , TO_CHAR(ch_mod_date,'YYYY-MM-DD') AS ch_mod_date
+		     , TO_CHAR(ch_deadline,'YYYY-MM-DD') AS ch_deadline
+		     , ch_attaches
+		     , ch_category
+		     , ch_mem_id
+		  FROM classhomeworks
+		 WHERE ch_no = #{chNo}
+	</select>
+	
+	<insert id="insertClasshomeworksVO" parameterType="com.next.classhomeworks.vo.ClasshomeworksVO">
+		INSERT INTO classhomeworks (
+					 ch_no
+			       , ch_title
+			       , ch_content
+			       , ch_reg_date
+			       , ch_deadline
+			       , ch_attaches
+			       , ch_category
+			       , ch_mem_id
+		 	) VALUE (
+		 			 SEQ_CLASSHOMEWORKS.NEXTVAL
+		 		   , #{chTitle}
+		 		   , #{chContent}
+		 		   , SYSDATE
+		 		   , #{chDeadline}
+		 		   , #{chAttaches}
+		 		   , #{chCategory}
+		 		   , #{chMemId}
+		 	)
+	</insert>
+	
+	<update id="updateClasshomeworksVO" parameterType="com.next.classhomeworks.vo.ClasshomeworksVO">
+		UPDATE classhomeworks
+		   SET ch_title 	= #{chTitle}
+		   	 , ch_content 	= #{chContent}
+		   	 , ch_reg_date  = SYSDATE
+		   	 , ch_attaches 	= #{chAttaches}
+		   	 , ch_category 	= #{chCategory}
+		 WHERE ch_no = #{chNo}
+	</update>
+	
+	<delete id="deleteClasshomeworksVO" parameterType="com.next.classhomeworks.vo.ClasshomeworksVO">
+		DELETE FROM classhomeworks
+			  WHERE ch_no = #{chNo}
+	</delete>
+	
+</mapper>

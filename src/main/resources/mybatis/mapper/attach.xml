@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.next.attach.dao.IAttachDao">
+
+	<insert id="insertAttach" parameterType="com.next.attach.vo.AttachVO">
+		INSERT INTO attach (
+		    				atch_no    		, atch_parent_no     , atch_category
+						  , atch_file_name  , atch_original_name , atch_file_size
+						  , atch_fancy_size , atch_content_type  , atch_path
+						  , atch_down_hit   , atch_del_yn    	 , atch_reg_date
+				  ) VALUES (
+					<![CDATA[
+					   seq_attach.nextval , #{atchParentNo}		, #{atchCategory}
+					   , #{atchFileName}  , #{atchOriginalName} , #{atchFileSize}
+					   , #{atchFancySize} , #{atchContentType}  , #{atchPath}
+					   , 0				  , 'N'					, SYSDATE
+					]]>
+				)
+ 	</insert>
+	
+	<select id="getAttachByParentNoList"
+		parameterType="com.next.attach.vo.AttachVO"
+		resultType="com.next.attach.vo.AttachVO">
+	    SELECT atch_no
+		   	 , atch_original_name
+		   	 , atch_fancy_size
+		   	 , atch_down_hit
+		   	 , TO_CHAR(atch_reg_date, 'YYYY.MM.DD') AS atch_reg_date 
+		 FROM  attach
+	 	WHERE atch_parent_no = #{atchParentNo}
+	 	  AND atch_category  = #{atchCategory}
+	 	  AND atch_del_yn    = 'N'
+	</select>
+
+	<select id="getAttach" parameterType="int" resultType="com.next.attach.vo.AttachVO">
+		SELECT atch_no
+	     , atch_file_name
+	     , atch_original_name
+	     , atch_file_size
+	     , atch_content_type
+	     , atch_path
+	  FROM attach
+	 WHERE atch_no = #{atchNo}
+	</select>
+
+	<update id="increaseDownHit" parameterType="int" >
+	 	<!-- attach 첨부파일 다운로드 횟수 1 증가 -->
+		UPDATE attach
+		   SET atch_down_hit = atch_down_hit+1
+		 WHERE atch_no = #{atchNo}
+ 	</update>
+ 	
+  	<update id="deleteAttaches" parameterType="com.next.attach.vo.AttachVO">
+ 		UPDATE attach
+		   SET atch_del_yn = 'Y'
+ 		 WHERE 
+ 		  <foreach collection="array" item="atchNo" 
+		 	      open="atch_no in (" 
+		 	      close=")" 
+		 	      separator=",">
+		 	#{atchNo}
+		 </foreach>
+ 	</update>
+
+</mapper>

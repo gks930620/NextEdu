@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.next.classmember.dao.IClassmemberDao">
+	<sql id="whereClause">
+		<if
+			test="@org.apache.commons.lang3.StringUtils@isNotBlank(searchWord)">
+			<choose>
+				<when test='searchType == "N"'>AND mem_name LIKE '%' || #{searchWord} || '%'</when>
+				<when test='searchType == "I"'>AND mem_id LIKE '%' || #{searchWord} || '%'</when>
+				<when test='searchType == "H"'>AND mem_hp LIKE '%' || #{searchWord} || '%'</when>
+				<when test='searchType == "A1"'>	AND mem_add1 LIKE '%' || #{searchWord} || '%'</when>
+				<when test='searchType == "A2"'>	AND mem_add2 LIKE '%' || #{searchWord} || '%'</when>
+				<otherwise>
+					AND mem_name LIKE '%' || #{searchWord} || '%'
+				</otherwise>
+			</choose>
+		</if>
+	</sql>
+
+	<update id="updateMember"
+		parameterType="com.next.classmember.vo.ClassmemberVO">
+		UPDATE member <![CDATA[
+		   SET mem_name = #{memName}		,mem_add1 = #{memAdd1} 	,mem_add2 = #{memAdd2}
+		      ,mem_zip = #{memZip}		,mem_mail = #{memMail}   ,mem_bir = #{memBir}
+		      ,mem_stuno = #{memStuno}		
+		WHERE mem_id = #{memId} ]]>
+	</update>
+
+
+	<select id="getMember" parameterType="string"
+		resultType="com.next.classmember.vo.ClassmemberVO">
+		SELECT mem_id
+			 , mem_pass
+			 , mem_name
+			 , mem_sex
+			 , TO_CHAR(mem_bir, 'YYYY-MM-DD') AS mem_bir
+			 , mem_zip
+			 , mem_add1
+			 , mem_add2
+			 , mem_hp
+			 , mem_mail
+			 , mem_tli
+			 , mem_role
+			 , mem_scid
+			 , mem_grade
+			 , mem_class
+			 , mem_stuno
+			 , mem_pnm
+			 , mem_php
+			 , mem_grant_yn
+		 FROM member
+    <![CDATA[ WHERE mem_id = #{memId} 
+		]]>
+	</select>
+
+	<select id="idCheck" resultType="int">
+		SELECT COUNT(*) FROM MEMBER
+		WHERE mem_id = #{memId}
+	</select>
+
+	<select id="getMemberCount" resultType="int"
+		parameterType="com.next.classmember.vo.ClassmemberVO">
+		SELECT count(*) FROM member WHERE 1 = 1
+		<include refid="whereClause" />
+	</select>
+
+	<select id="getMemberList"
+		parameterType="com.next.classmember.vo.ClassmemberSearchVO"
+		resultType="com.next.classmember.vo.ClassmemberVO">
+		<include refid="common.PRE_PAGING_SQL" />
+		SELECT mem_id,
+		mem_pass,
+		mem_name,
+		mem_sex,
+		TO_CHAR(mem_bir, 'YYYY-MM-DD')
+		AS mem_bir,
+		mem_zip,
+		mem_add1,
+		mem_add2,
+		mem_hp,
+		mem_mail,
+		mem_tli,
+		mem_role,
+		mem_scid,
+		mem_grade,
+		mem_class,
+		mem_stuno,
+		mem_pnm,
+		mem_php,
+		mem_grant_yn
+		FROM member
+		where 1 = 1
+		<include refid="whereClause" />
+		order by mem_stuno desc
+		<include refid="common.SUF_PAGING_SQL" />
+	</select>
+
+</mapper>

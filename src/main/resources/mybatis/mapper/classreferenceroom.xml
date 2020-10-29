@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper
+	namespace="com.next.classreferenceroom.dao.IClassreferenceroomDao">
+	
+	<sql id="whereClause">
+		<if
+			test="@org.apache.commons.lang3.StringUtils@isNotBlank(searchWord)">
+			<choose>
+				<when test='searchType == "T"'>AND cr_title LIKE '%' || #{searchWord} || '%'</when>
+				<when test='searchType == "C"'>AND cr_content LIKE '%' || #{searchWord} || '%'</when>
+				<otherwise>
+					AND cr_title LIKE '%' || #{searchWord} || '%'
+				</otherwise>
+			</choose>
+		</if>
+	</sql>
+	
+	<resultMap
+		type="com.next.classreferenceroom.vo.ClassreferenceroomVO"
+		id="classreferenceroomMap">
+		<id column="cr_no" property="crNo" />
+		<result column="cr_title" property="crTitle" />
+		<result column="cr_category" property="crCategory" />
+		<result column="cr_mem_id" property="crMemId" />
+		<result column="cr_content" property="crContent" />
+		<result column="cr_reg_date" property="crRegDate" />
+		<result column="cr_mod_date" property="crModDate" />
+		<collection property="attaches"
+			ofType="com.next.attach.vo.AttachVO"
+			column="{atchParentNo=cr_no, atchCategory = cr_type}"
+			select="com.next.attach.dao.IAttachDao.getAttachByParentNoList" />
+	</resultMap>
+
+
+
+	<select id="getClassreferenceVOCount" resultType="int" parameterType="com.next.common.vo.PagingVO">
+		SELECT count(*)
+		  FROM classreferenceroom 	
+ 	     WHERE 1 = 1
+ 	</select>
+
+	<select id="getClassreferenceroomVOList"
+		resultType="com.next.classreferenceroom.vo.ClassreferenceroomVO"
+		parameterType="com.next.common.vo.PagingVO">
+		<include refid="common.PRE_PAGING_SQL" />
+		SELECT cr_no
+		, cr_category
+		, cr_title
+		, cr_content
+		, TO_CHAR(cr_reg_date,'YYYY-MM-DD') AS cr_reg_date
+		, TO_CHAR(cr_mod_date,'YYYY-MM-DD') AS cr_mod_date
+		, cr_attaches
+		, cr_mem_id
+		FROM classreferenceroom
+		WHERE 1 = 1
+		<include refid="whereClause" />
+		 ORDER BY cr_no DESC
+		<include refid="common.SUF_PAGING_SQL" />
+	</select>
+
+	<select id="getClassreferenceroom"
+		resultMap="classreferenceroomMap"
+		parameterType="int">
+		SELECT cr_no
+		, cr_category
+		, cr_title
+		, cr_content
+		, TO_CHAR(cr_reg_date,'YYYY-MM-DD') AS cr_reg_date
+		, TO_CHAR(cr_mod_date,'YYYY-MM-DD') AS cr_mod_date
+		, 'CLASSREFERENCEROOM' as cr_type
+		, cr_mem_id
+		FROM classreferenceroom
+		WHERE cr_no = #{crNo}
+	</select>
+
+	<insert id="insertBoard"
+		parameterType="com.next.classreferenceroom.vo.ClassreferenceroomVO">
+		<selectKey keyProperty="crNo" resultType="int" order="BEFORE">
+			SELECT seq_classreferenceroom.nextval FROM dual
+		</selectKey>
+		INSERT INTO classreferenceroom (
+		cr_no, cr_category, cr_title, cr_content, cr_reg_date, cr_mem_id )
+		VALUES ( 	<![CDATA[  #{crNo}, #{crCategory}, #{crTitle}, #{crContent}, SYSDATE, #{crMemId} )
+		]]> 
+</insert>
+
+	<update id="updateBoard"
+		parameterType="com.next.classreferenceroom.vo.ClassreferenceroomVO">
+		UPDATE classreferenceroom
+		SET cr_title = #{crTitle}
+		, cr_category= #{crCategory}
+		, cr_content = #{crContent}
+		, cr_mod_date = SYSDATE
+		WHERE cr_no = #{crNo}
+	</update>
+
+	<delete id="deleteBoard"
+		parameterType="com.next.classreferenceroom.vo.ClassreferenceroomVO">
+		delete from classreferenceroom where cr_no = #{crNo}
+	</delete>
+
+</mapper>

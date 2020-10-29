@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- nameSpace : 간단하게 하셔도 됩니다. 단, mapper 클래스를 사용하려면 완전한 클래스 이름으로 지정 -->
+
+<mapper namespace="com.next.member.dao.IMemberDao"> <!-- 인터페이스 -->
+	<sql id="whereClause">
+		<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(searchJob)">
+			AND mem_job = #{searchJob}
+		</if>
+		<if	test="@org.apache.commons.lang3.StringUtils@isNotBlank(searchLike)">
+			AND mem_like = #{searchLike}
+		</if>
+		<if	test="@org.apache.commons.lang3.StringUtils@isNotBlank(searchWord)">
+			<choose>
+				<when test='searchType == "N"'>AND mem_name LIKE '%' || #{searchWord} || '%'</when>
+				<when test='searchType == "I"'>AND mem_id LIKE '%' || #{searchWord} || '%'</when>
+				<when test='searchType == "H"'>AND mem_hp LIKE '%' || #{searchWord} || '%'</when>
+				<when test='searchType == "A1"'>	AND mem_add1 LIKE '%' || #{searchWord} || '%'</when>
+				<when test='searchType == "A2"'>	AND mem_add2 LIKE '%' || #{searchWord} || '%'</when>
+				<otherwise>
+					AND mem_name LIKE '%' || #{searchWord} || '%'
+				</otherwise>
+			</choose>
+		</if>
+	</sql>
+	
+	<insert id="insertMember"
+		parameterType="com.next.member.vo.MemberVO">
+		INSERT INTO member (
+			 mem_id 		,mem_pass 		,mem_name 		,mem_sex
+			,mem_bir		,mem_zip 		,mem_add1 		,mem_add2
+			,mem_hp 		,mem_mail 		,mem_tli 		,mem_role
+			,mem_scid 		,mem_grade 	,mem_class 	,mem_stuno
+			,mem_pnm 		,mem_php		,mem_grant_yn	,mem_scnm
+		) VALUES (
+			<![CDATA[                                   
+			 #{memId}    ,#{memPass} 		,#{memName} 		,#{memSex}  
+			,#{memBir}   ,#{memZip} 		,#{memAdd1}		,#{memAdd2}
+			,#{memHp}    ,#{memMail}  	,#{memTli} 		,'STUDENT'
+			,#{memScid}  ,#{memGrade} 	,#{memClass}		,#{memStuno}
+			,#{memPnm}	  ,#{memPhp}		,'N'				,#{memScnm}
+		 	)
+			 ]]>
+				 
+	</insert>
+
+	 <update id="updateMember"
+		parameterType="com.next.member.vo.MemberVO">
+		UPDATE member <![CDATA[
+		SET mem_pass = #{memPass}			
+			,mem_name = #{memName}		
+			,mem_add1 = #{memAdd1} 	
+			,mem_add2 = #{memAdd2} 		
+			,mem_zip = #{memZip}		
+			,mem_mail = #{memMail} 
+			,mem_bir = #{memBir} 		
+			,mem_scid = #{memScid} 		
+			,mem_grade = #{memGrade} 
+			,mem_class = #{memClass}		
+			,mem_stuno = #{memStuno}		
+		WHERE mem_id = #{memId} ]]>
+	</update>
+	
+	<delete id="deleteMember" parameterType="com.next.member.vo.MemberVO">
+		DELETE FROM MEMBER
+		 WHERE mem_id = #{memId}
+	</delete>
+	
+
+	<select id="getMember" parameterType="string"
+	resultType="com.next.member.vo.MemberVO">
+		SELECT mem_id
+			   ,mem_pass
+			   ,mem_name
+			   ,mem_sex
+			   ,TO_CHAR(mem_bir, 'YYYY-MM-DD') AS mem_bir
+			   ,mem_zip
+			   ,mem_add1
+			   ,mem_add2
+			   ,mem_hp
+			   ,mem_mail
+			   ,mem_tli
+			   ,mem_role
+			   ,mem_scid
+			   ,mem_grade
+			   ,mem_class
+			   ,mem_stuno
+			   ,mem_pnm
+			   ,mem_php
+			   ,mem_grant_yn
+			   ,mem_scnm
+    FROM member
+    <![CDATA[ WHERE mem_id = #{memId} 
+		]]>
+	</select>
+	
+	<select id="idCheck" resultType="int" parameterType="com.next.member.vo.MemberVO">
+		SELECT COUNT(*)
+		  FROM MEMBER
+		 WHERE mem_id = #{memId}
+	</select>
+	
+<!-- 	<select id="getUserRoleByUserId" parameterType="String"
+		resultType="String">
+		SELECT LISTAGG(role_nm, ', ') WITHIN GROUP(ORDER BY role_nm ) FROM user_role
+		WHERE user_id = #{userId}
+	</select> -->
+	
+	<select id="getTli" resultType="int" parameterType="com.next.member.vo.MemberVO">
+		SELECT count(*)
+		FROM teacherLicense 
+		where tl_name=#{memName}
+		AND  tl_no=#{memTli}
+	</select>
+	
+	<update id="updateTli" parameterType="String">
+		UPDATE member <![CDATA[
+		SET mem_role = 'TEACHER'					
+		WHERE mem_id = #{memId} ]]>
+	
+	</update>
+
+</mapper>

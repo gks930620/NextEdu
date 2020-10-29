@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:mybatis-spring="http://mybatis.org/schema/mybatis-spring"
+	xsi:schemaLocation="http://mybatis.org/schema/mybatis-spring http://mybatis.org/schema/mybatis-spring-1.2.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+<!-- DB 데이터 소스, Mybatis 관련된것만 -->
+
+<bean id="dataSource"
+		class="org.apache.commons.dbcp2.BasicDataSource"
+		destroy-method="close">
+		<property name="driverClassName" value="#{app['jdbc.driverClassName']}"></property>
+		<property name="url" value="#{app['jdbc.url']}"></property>
+		<property name="username"			value="#{app['jdbc.username']}"></property>
+		<property name="password"			value="#{app['jdbc.password']}"></property>
+		<property name="validationQuery"			value="#{app['jdbc.validationQuery']}"></property>
+		<property name="maxTotal"			value="#{app['jdbc.maxTotal']}"></property>
+		<property name="minIdle"			value="#{app['jdbc.minIdle']}"></property>
+		<property name="testWhileIdle" value="true"></property>
+		<property name="timeBetweenEvictionRunsMillis"		value="600000"></property>
+	</bean>
+	
+<bean id="sqlSessionFactory"
+		class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="configLocation"			value="/WEB-INF/classes/mybatis/mybatis-config.xml" />
+		<property name="mapperLocations"			value="classpath:/mybatis/mapper/*.xml" />
+	</bean>
+
+	<mybatis-spring:scan base-package="com.next"
+		annotation="org.apache.ibatis.annotations.Mapper" />
+
+</beans>

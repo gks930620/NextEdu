@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="com.next.sitenotice.dao.ISitenoticeDao">
+
+	<select id="getSitenoticeVOCount" resultType="int" parameterType="com.next.sitequestion.vo.SitequestionSearchVO">
+		SELECT count(*)
+		  FROM sitenotice 	
+ 	     WHERE 1 = 1
+ 	</select>
+
+
+  <select id="getSitenoticeVOList" resultType="com.next.sitenotice.vo.SitenoticeVO" parameterType="com.next.sitequestion.vo.SitequestionSearchVO">
+  	<include refid="common.PRE_PAGING_SQL" />
+  	SELECT sn_no 
+	     , sn_title
+	     , sn_content
+	     , TO_CHAR(sn_reg_date,'YYYY-MM-DD') AS sn_reg_date
+	     , TO_CHAR(sn_mod_date,'YYYY-MM-DD') AS sn_mod_date
+	     , sn_top_yn
+	  FROM sitenotice
+  ORDER BY sn_no DESC
+  	 <include refid="common.SUF_PAGING_SQL" />
+  </select>
+  
+  <select id="getSitenoticeVOTopList" resultType="com.next.sitenotice.vo.SitenoticeVO" parameterType="com.next.sitequestion.vo.SitequestionSearchVO">
+    SELECT sn_no 
+	     , sn_title
+	     , sn_content
+	     , TO_CHAR(sn_reg_date,'YYYY-MM-DD') AS sn_reg_date
+	     , TO_CHAR(sn_mod_date,'YYYY-MM-DD') AS sn_mod_date
+	     , sn_top_yn
+	  FROM sitenotice
+     WHERE sn_top_yn = '중요공지'
+  ORDER BY sn_no DESC
+  </select>	
+  
+  
+  <select id="getSitenoticeVO" resultType="com.next.sitenotice.vo.SitenoticeVO" parameterType="int">
+  	SELECT sn_no
+	     , sn_title
+	     , sn_content
+	     , TO_CHAR(sn_reg_date,'YYYY-MM-DD') AS sn_reg_date
+	     , TO_CHAR(sn_mod_date,'YYYY-MM-DD') AS sn_mod_date
+	     , sn_top_yn
+	  FROM sitenotice
+  	 WHERE sn_no = #{snNo}
+  </select>
+  
+  <insert id="insertSitenoticeVO" parameterType="com.next.sitenotice.vo.SitenoticeVO">
+  	INSERT INTO sitenotice (
+				       sn_no
+				     , sn_title
+				     , sn_content
+				     , sn_reg_date
+				     , sn_top_yn
+		 ) VALUES (
+		 			   SEQ_SITENOTICE.NEXTVAL
+		 			 , #{snTitle}
+		 			 , #{snContent}
+		 			 , SYSDATE
+		 			 , #{snTopYn}
+		 )
+  </insert>
+  
+  <update id="updateSitenoticeVO" parameterType="com.next.sitenotice.vo.SitenoticeVO">
+  	UPDATE sitenotice
+	   SET sn_title 	= #{snTitle}
+	   	 , sn_content 	= #{snContent}
+	   	 , sn_mod_date  = SYSDATE
+	   	 , sn_top_yn 	= #{snTopYn}
+	 WHERE sn_no = #{snNo}
+  </update>
+  
+  <delete id="deleteSitenoticeVO" parameterType="com.next.sitenotice.vo.SitenoticeVO">
+  	DELETE FROM sitenotice
+		  WHERE sn_no = #{snNo}
+  </delete>
+  
+  
+</mapper>

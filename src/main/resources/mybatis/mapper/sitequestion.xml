@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ <mapper namespace="com.next.sitequestion.dao.ISitequestionDao">
+ 	
+ 	<resultMap type="com.next.sitequestion.vo.SitequestionVO" id="sitequestionViewMap">
+ 		<id column="sq_no" property="sqNo"/>
+		<result column="sq_category" property="sqCategory"/>
+		<result column="sq_title" property="sqTitle"/>
+		<result column="sq_mem_id" property="sqMemId"/>
+		<result column="sq_reg_date" property="sqRegDate"/>
+		<result column="sq_mod_date" property="sqModDate"/>
+		<result column="sq_content" property="sqContent"/>
+		<result column="sq_attaches" property="sqAttaches"/>
+		<result column="sq_answer_yn" property="sqAnswerYn"/>
+		<result column="sq_writer" property="sqWriter"/>
+		
+		<association property="siteanswerVO" javaType="com.next.siteanswer.vo.SiteanswerVO">
+			<id column="sa_no" property="saNo"/>
+			<result column="sa_content" property="saContent"/>
+			<result column="sa_sq_no" property="saSqNo"/>
+			<result column="sa_reg_date" property="saRegDate"/>
+		</association>
+				
+		<collection property="attaches" ofType="com.next.attach.vo.AttachVO"
+					column="{atchParentNo=sq_no, atchCategory = sq_type}"
+					select="com.next.attach.dao.IAttachDao.getAttachByParentNoList" 
+					/>
+		
+ 	</resultMap>
+ 	
+	<select id="getSitequestionVOCountEach" resultType="int" parameterType="com.next.login.vo.UserVO">
+		SELECT count(*)
+		  FROM SITEQUESTION
+		 WHERE sq_writer = #{userName}
+ 	</select>
+  	
+ 	<select id="getSitequestionVOCount" resultType="int" parameterType="com.next.login.vo.UserVO">
+		SELECT count(*)
+		  FROM SITEQUESTION
+ 	</select>
+  	
+ 	<select id="getSitequestionVOList" resultType="com.next.sitequestion.vo.SitequestionVO" parameterType="com.next.common.vo.PagingVO">
+  		<include refid="common.PRE_PAGING_SQL" />
+	 	SELECT sq_no
+		     , sq_category
+		     , sq_title
+		     , sq_mem_id
+		     , TO_CHAR(sq_reg_date, 'YYYY-MM-DD HH24:MI') AS sq_reg_date
+		     , sq_answer_yn
+		     , sq_writer
+	     FROM SITEQUESTION
+ 	 ORDER BY sq_no DESC
+  		<include refid="common.SUF_PAGING_SQL" />
+  	</select>
+  	
+  	<select id="getSitequestionVOEachList" resultType="com.next.sitequestion.vo.SitequestionVO" parameterType="com.next.login.vo.UserVO">
+  		<include refid="common.PRE_PAGING_SQL" />
+  		SELECT sq_no
+		     , sq_category
+		     , sq_title
+		     , sq_mem_id
+		     , TO_CHAR(sq_reg_date, 'YYYY-MM-DD HH24:MI') AS sq_reg_date
+		     , sq_answer_yn
+		     , sq_writer
+	     FROM SITEQUESTION
+	    WHERE sq_writer = #{userName}
+ 	 ORDER BY sq_no DESC
+		<include refid="common.SUF_PAGING_SQL" />
+  	</select>
+ 	
+ 	<select id="getSitequestionVO" parameterType="int" resultMap="sitequestionViewMap">
+ 		SELECT sq_no
+		     , sq_category
+		     , sq_title
+		     , sq_mem_id
+		     , sq_writer
+		     , TO_CHAR(sq_reg_date, 'YYYY-MM-DD HH24:MI') AS sq_reg_date
+		     , TO_CHAR(sq_mod_date, 'YYYY-MM-DD HH24:MI') AS sq_mod_date
+		     , sq_content
+	         , b.sa_content as sa_content
+             , b.sa_no as sa_no
+             , b.sa_sq_no as sa_sq_no
+             , TO_CHAR(b.sa_reg_date, 'YYYY-MM-DD HH24:MI') AS sa_reg_date
+             , 'SITEQUESTION' AS sq_type
+	      FROM SITEQUESTION a LEFT join SITEANSWER b
+          	on (a.sq_no = b.sa_sq_no)
+	     WHERE sq_no = #{xxx}
+ 	</select>
+ 
+ 	<insert id="insertSitequestionVO" parameterType="com.next.sitequestion.vo.SitequestionVO" >
+ 		<selectKey keyProperty="sqNo" order="BEFORE" resultType="int">
+ 			SELECT SEQ_SITEQUESTION.NEXTVAL FROM DUAL
+ 		</selectKey>
+ 		INSERT INTO SITEQUESTION (
+				    sq_no
+				    , sq_title
+				    , sq_content
+				    , sq_reg_date
+				    , sq_answer_yn
+				    , sq_attaches
+				    , sq_category
+				    , sq_mem_id
+				    , sq_writer
+		   ) VALUES (
+		   			<![CDATA[
+				      #{sqNo}
+				    , #{sqTitle}
+				    , #{sqContent}
+				    , SYSDATE
+				    , '답변중'
+				    , #{sqAttaches}
+				    , #{sqCategory}
+				    , #{sqMemId}
+				    , #{sqWriter}
+				    )
+				]]>
+ 	</insert>
+ 
+ 	<update id="updateSitequestionVO" parameterType="com.next.sitequestion.vo.SitequestionVO" >
+ 		UPDATE SITEQUESTION
+		<![CDATA[
+		   SET sq_title = #{sqTitle}
+			 , sq_content = #{sqContent}
+		     , sq_mod_date = SYSDATE
+			 , sq_attaches = #{sqAttaches}
+			 , sq_category = #{sqCategory}
+			 , sq_writer = #{sqWriter} 
+		 WHERE sq_no = #{sqNo}
+ 		]]>
+ 	</update>
+ 	
+ 	<update id="updateSitequestionVO2" parameterType="com.next.sitequestion.vo.SitequestionVO" >
+ 		UPDATE SITEQUESTION
+		<![CDATA[
+		   SET sq_answer_yn = '답변완료'
+		 WHERE sq_no = #{sqNo}
+ 		]]>
+ 	</update>
+ 	
+ 	<delete id="deleteSitequestionVO" parameterType="com.next.sitequestion.vo.SitequestionVO">
+ 		DELETE FROM SITEQUESTION
+		 	  WHERE sq_no = #{sqNo}
+ 	</delete>
+ </mapper>

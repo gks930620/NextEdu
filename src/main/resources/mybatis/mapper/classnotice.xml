@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.next.classnotice.dao.IClassnoticeDao">
+
+	<select id="getClassnoticeVOList"
+		resultType="com.next.classnotice.vo.ClassnoticeVO"
+		parameterType="com.next.classnotice.vo.ClassnoticeVO">
+		SELECT cn_no
+		, cn_category
+		, cn_title
+		, cn_content
+		, TO_CHAR(cn_reg_date,'YYYY-MM-DD') AS cn_reg_date
+		, TO_CHAR(cn_mod_date,'YYYY-MM-DD') AS cn_mod_date
+		, cn_top_yn
+		, cn_attaches
+		, cn_mem_id
+		FROM (SELECT * FROM classnotice ORDER BY cn_no DESC)
+	</select>
+	
+	<select id="getClassnoticeVOCount" resultType="int" parameterType="com.next.common.vo.PagingVO">
+		SELECT count(*)
+		  FROM classnotice 	
+ 	     WHERE 1 = 1
+ 	</select>
+
+	<select id="getClassnotice"
+		resultType="com.next.classnotice.vo.ClassnoticeVO" parameterType="int">
+		SELECT cn_no
+		, cn_category
+		, cn_title
+		, cn_content
+		, TO_CHAR(cn_reg_date,'YYYY-MM-DD') AS cn_reg_date
+		, TO_CHAR(cn_mod_date,'YYYY-MM-DD') AS cn_mod_date
+		, cn_top_yn
+		, cn_attaches
+		, cn_mem_id
+		FROM classnotice
+		WHERE cn_no = #{cnNo}
+	</select>
+
+	<insert id="insertBoard"
+		parameterType="com.next.classnotice.vo.ClassnoticeVO">
+		<selectKey resultType="int" keyProperty="cnNo"
+			order="BEFORE">
+			SELECT seq_classnotice.nextval FROM dual
+		</selectKey>
+		INSERT INTO classnotice (
+		cn_no
+		, cn_category
+		, cn_title
+		, cn_content
+		, cn_reg_date
+		, cn_top_yn
+		, cn_attaches
+		, cn_mem_id )
+		VALUES (
+		#{cnNo}
+		, #{cnCategory}
+		, #{cnTitle}
+		, #{cnContent}
+		, SYSDATE
+		, #{cnTopYn}
+		, #{cnAttaches}
+		, #{cnMemId} )
+	</insert>
+
+	<update id="updateBoard"
+		parameterType="com.next.classnotice.vo.ClassnoticeVO">
+		UPDATE classnotice
+		SET cn_title = #{cnTitle}
+		, cn_category = #{cnCategory}
+		, cn_content = #{cnContent}
+		, cn_mod_date = SYSDATE
+		, cn_top_yn = #{cnTopYn}
+		WHERE cn_no = #{cnNo}
+	</update>
+
+	<delete id="deleteBoard"
+		parameterType="com.next.classnotice.vo.ClassnoticeVO">
+ 	delete from classnotice where cn_no = #{cnNo}
+	</delete>
+
+</mapper>

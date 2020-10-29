@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/mvc"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:mybatis-spring="http://mybatis.org/schema/mybatis-spring"
+	xmlns:websocket="http://www.springframework.org/schema/websocket"
+	xsi:schemaLocation="http://www.springframework.org/schema/websocket http://www.springframework.org/schema/websocket/spring-websocket-4.3.xsd
+		http://www.springframework.org/schema/mvc https://www.springframework.org/schema/mvc/spring-mvc.xsd
+		http://mybatis.org/schema/mybatis-spring http://mybatis.org/schema/mybatis-spring-1.2.xsd
+		http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.3.xsd">
+
+	<!-- 매핑에 대해서 바로 뷰를 설정하고자 하는 경우(컨트롤러가 필요없는 경우) -->
+	<!-- view-name 이 없다면 path 정보가 뷰로 결정된다. -->
+	<!-- <view-controller path="/upload/form" view-name="uploadForm" /> -->
+
+	<!-- DispatcherServlet Context: defines this servlet's request-processing 
+		infrastructure -->
+
+	<!-- Enables the Spring MVC @Controller programming model -->
+	<annotation-driven />
+
+
+	<!-- 요청에 대한 매핑이 존재하지 않을때 WAS에게 요청을 넘겨요... -->
+	<default-servlet-handler />
+
+	<context:annotation-config />
+	<!-- 정적자원(이미지, css, js, ..) 의 GET 요청에 대한 매핑 -->
+	<!-- <resources mapping="/resources/**" location="/resources/" /> <resources 
+		mapping="/js/**" location="/js/" /> -->
+
+	<!-- Resolves views selected for rendering by @Controllers to .jsp resources 
+		in the /WEB-INF/views directory -->
+	<beans:bean
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<beans:property name="prefix" value="/WEB-INF/views/" />
+		<beans:property name="suffix" value=".jsp" />
+	</beans:bean>
+
+	<beans:bean id="mapper" class="com.fasterxml.jackson.databind.ObjectMapper" />
+
+	<!-- 자바파일에 설정된 어노테이션을 검색해서 빈으로 등록 빈 : 스프링이 관리하는 객체 -->
+	<context:component-scan base-package="com.next"
+		use-default-filters="false">
+		<context:include-filter type="annotation"
+			expression="org.springframework.stereotype.Controller" />
+	</context:component-scan>
+
+	<beans:bean id="multipartResolver"
+		class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<beans:property name="maxUploadSizePerFile"
+			value="#{app['file.upload.each.size']}" />
+		<beans:property name="maxUploadSize"
+			value="#{app['file.upload.max.size']}" />
+		<beans:property name="maxInMemorySize"
+			value="#{app['file.upload.memory.size']}" />
+	</beans:bean>
+
+	<!-- Websocket -->
+	<websocket:handlers allowed-origins="*">
+		<websocket:mapping handler="multiHandler" path="/chat" />		
+	</websocket:handlers>
+	
+	<!-- <beans:bean id="echoHandler" class="com.next.chat.EchoHandler" /> -->
+	<beans:bean id="multiHandler" class="com.next.chat.MultiChatHandler"  />
+	
+	<!-- 모든요청에 적용되는 인터셉터 -->
+
+	<interceptors>
+		<beans:bean
+			class="com.next.common.interceptor.LoggingInterceptor" />
+
+		<interceptor>
+			<mapping path="/mypage/**" />
+			<mapping path="/sitequestion/**" />
+			<mapping path="/class**/**" />
+			<!-- <exclude-mapping path="/reply/replyList" /> -->
+			<beans:bean
+				class="com.next.common.interceptor.LoginCheckInterceptor" />
+		</interceptor>
+	</interceptors>
+
+</beans:beans>
+
+
+
+

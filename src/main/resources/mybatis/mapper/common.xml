@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="common">
+	<sql id="PRE_PAGING_SQL">
+		SELECT * 
+		  FROM ( SELECT rownum rnum , a.* 
+		           FROM (
+	</sql>
+	
+	<sql id="SUF_PAGING_SQL" >
+		<![CDATA[
+	                   ) a 
+	            WHERE rownum <= #{lastRow} 
+	          ) b 
+	    WHERE rnum BETWEEN #{firstRow} AND #{lastRow}
+	   ]]> 
+	</sql>
+    
+</mapper>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- mybatis/mybaits-config.xml -->
+<!DOCTYPE configuration
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	
+	<settings>
+	  <!-- 데이터베이스 칼럼명 형태인 A_COLUMN을 CamelCase형태의 자동으로 매핑 --> 
+		<setting name="mapUnderscoreToCamelCase" value="true" />
+		<setting name="jdbcTypeForNull" value="NULL" />
+	</settings>
+
+
+  
+ 
+  
+</configuration>
+
+
+
